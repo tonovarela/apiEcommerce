@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using ApiEcommerce.Models.Entities;
-class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
