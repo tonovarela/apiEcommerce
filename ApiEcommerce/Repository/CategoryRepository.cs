@@ -19,22 +19,30 @@ public class CategoryRepository : ICategoryRepository
 
     public bool CreateCategory(Category category)
     {
-        return _db.Categories.Add(category) != null;
+        category.CreationDate = DateTime.Now;
+        _db.Categories.Add(category);
+        return Save();
+
     }
 
     public bool DeleteCategory(Category category)
     {
-        return _db.Categories.Remove(category) != null;
+        _db.Categories.Remove(category);
+        return Save();
+         
     }
 
     public ICollection<Category> GetCategories()
     {
-        return _db.Categories.ToList();
+        return _db.Categories.OrderBy(c => c.Name).ToList();
     }
 
     public Category GetCategory(int categoryId)
     {
-        return _db.Categories.FirstOrDefault(c => c.Id == categoryId)!;
+        return _db
+                .Categories
+                .FirstOrDefault(c => c.Id == categoryId)
+                ?? throw new InvalidOperationException("Category not found");        
     }
 
     public bool Save()
@@ -45,7 +53,7 @@ public class CategoryRepository : ICategoryRepository
     public bool UpdateCategory(Category category)
     {
         _db.Categories.Update(category);
-        return true;
+        return Save(); 
     }
 }
 
