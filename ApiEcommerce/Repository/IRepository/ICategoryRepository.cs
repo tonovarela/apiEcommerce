@@ -14,7 +14,7 @@ public interface ICategoryRepository
     bool CreateCategory(Category category);
     bool UpdateCategory(Category category);
     bool DeleteCategory(Category category);
-    bool Save();
+     bool Save();
 
 
 }
