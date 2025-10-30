@@ -3,6 +3,7 @@ using AutoMapper;
 using ApiEcommerce.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using ApiEcommerce.Models.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ApiEcommerce.Controllers
 {
@@ -59,15 +60,26 @@ namespace ApiEcommerce.Controllers
         [HttpPost(Name = "CreateCategory")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult CreateCategory([FromBody] CategoryDto categoryDto)
         {
-            if (categoryDto == null)
+            if (categoryDto == null) return BadRequest();
+
+            if (_categoryRepository.CategoryExists(categoryDto.Name))
             {
-                return BadRequest();
+                ModelState.AddModelError("CustomError", "Category already exists!");
+                return BadRequest(ModelState);                
             }
 
             var category = _mapper.Map<Category>(categoryDto);
-            _categoryRepository.CreateCategory(category);
+
+            bool response = _categoryRepository.CreateCategory(category);
+           if (!response)
+            {
+                ModelState.AddModelError("CustomError", "Error saving category!");
+                return StatusCode(500, ModelState);
+            }
 
             var createdCategoryDto = _mapper.Map<CategoryDto>(category);
             return CreatedAtRoute("GetCategory", new { categoryId = createdCategoryDto.Id }, createdCategoryDto);
@@ -77,15 +89,25 @@ namespace ApiEcommerce.Controllers
         [HttpPut("{categoryId:int}", Name = "UpdateCategory")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto categoryDto)
-        {
+        {            
             if (categoryDto == null || categoryId != categoryDto.Id)
             {
                 return BadRequest();
             }
-
+            if (_categoryRepository.CategoryExists(categoryDto.Name))
+            {
+                ModelState.AddModelError("CustomError", "Category already exists!");
+                return BadRequest(ModelState);
+            }
             var category = _mapper.Map<Category>(categoryDto);
-            _categoryRepository.UpdateCategory(category);
+            bool registro = _categoryRepository.UpdateCategory(category);             
+             if (!registro)
+            {
+                ModelState.AddModelError("CustomError", "Error updating category!");
+                return StatusCode(500, ModelState);
+            }
             return NoContent();
         }
 
