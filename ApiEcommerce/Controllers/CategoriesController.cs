@@ -9,7 +9,7 @@ namespace ApiEcommerce.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize]    
     public class CategoriesController : ControllerBase
     {
          private readonly ICategoryRepository _categoryRepository;
@@ -23,7 +23,7 @@ namespace ApiEcommerce.Controllers
         [HttpGet(Name = "GetCategories")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [AllowAnonymous]        
         public IActionResult GetCategories()
         {
             var categories = _categoryRepository.GetCategories();
@@ -40,6 +40,7 @@ namespace ApiEcommerce.Controllers
         [HttpGet("{categoryId:int}", Name = "GetCategory")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [AllowAnonymous]
         public IActionResult GetCategory(int categoryId)
         {
             try

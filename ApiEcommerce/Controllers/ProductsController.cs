@@ -4,13 +4,14 @@ using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 namespace ApiEcommerce.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [EnableCors(PolicyNames.AllowSpecificOrigins)]
-
+[Authorize]
 public class ProductsController : ControllerBase
 {
 
@@ -32,6 +33,7 @@ public class ProductsController : ControllerBase
     [HttpGet("{productId:int}", Name = "GetProduct")]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public IActionResult GetProduct(int productId)
     {
         try
@@ -53,6 +55,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet(Name = "GetProducts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public IActionResult GetProducts()
     {
         var products = _productRepository.GetProducts();
@@ -105,6 +108,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet("category/{categoryId:int}", Name = "GetProductsForCategory")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public IActionResult GetProductsForCategory(int categoryId)
     {
         var products = _productRepository.GetProductsForCategory(categoryId);
@@ -120,6 +124,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet("searchByDescription/{productDescription}", Name = "GetProductsByDescription")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public IActionResult GetProductsByDescription(string productDescription)
     {
         var products = _productRepository.SearchProductByDescription(productDescription);
@@ -135,6 +140,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet("searchByname/{productName}", Name = "GetProductsByName")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
     public IActionResult GetProductsByName(string productName)
     {
         var products = _productRepository.SearchProduct(productName);
