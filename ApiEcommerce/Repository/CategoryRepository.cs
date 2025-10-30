@@ -16,6 +16,10 @@ public class CategoryRepository : ICategoryRepository
     {
         return _db.Categories.Any(c => c.Name.ToLower().Trim() == name.ToLower().Trim());
     }
+    public bool CategoryExists(int categoryId )
+    {
+        return _db.Categories.Any(c => c.Id == categoryId);
+    }
 
     public bool CreateCategory(Category category)
     {

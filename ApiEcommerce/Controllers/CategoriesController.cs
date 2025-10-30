@@ -3,7 +3,6 @@ using AutoMapper;
 using ApiEcommerce.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using ApiEcommerce.Models.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ApiEcommerce.Controllers
 {
