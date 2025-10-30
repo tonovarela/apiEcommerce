@@ -122,7 +122,12 @@ namespace ApiEcommerce.Controllers
             {
                 return NotFound();
             }
-            _categoryRepository.DeleteCategory(category);
+            bool seElimino = _categoryRepository.DeleteCategory(category);
+            if (!seElimino)
+            {
+                ModelState.AddModelError("CustomError", "Error deleting category!");
+                return StatusCode(500, ModelState);
+            }
             return NoContent();
         }
         
