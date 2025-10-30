@@ -1,7 +1,8 @@
 using ApiEcommerce.Repository;
 using ApiEcommerce.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using ApiEcommerce.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+var policy = (CorsPolicyBuilder builder) => { builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();};
+
+builder.Services.AddCors(op =>
+{
+    op.AddPolicy(PolicyNames.AllowSpecificOrigins, policy);
+});
 
 
 var app = builder.Build();
@@ -30,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(PolicyNames.AllowSpecificOrigins);
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

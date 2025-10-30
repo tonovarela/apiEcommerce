@@ -1,14 +1,18 @@
 
+using ApiEcommerce.Constants;
 using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiEcommerce.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+
+[EnableCors(PolicyNames.AllowSpecificOrigins)]
 public class ProductsController : ControllerBase
 {
 
@@ -57,8 +61,7 @@ public class ProductsController : ControllerBase
         var productsDto = new List<ProductDto>();
         foreach (Product product in products)
         {
-            var ProductDto = _mapper.Map<ProductDto>(product);
-            Console.WriteLine(ProductDto.CategoryName);
+            var ProductDto = _mapper.Map<ProductDto>(product);            
             productsDto.Add(ProductDto);
         }
 
