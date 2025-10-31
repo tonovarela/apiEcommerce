@@ -11,7 +11,7 @@ namespace ApiEcommerce.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [EnableCors(PolicyNames.AllowSpecificOrigins)]
-[Authorize]
+[Authorize(Roles = "Admin")]    
 public class ProductsController : ControllerBase
 {
 

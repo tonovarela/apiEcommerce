@@ -4,6 +4,7 @@ using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace ApiEcommerce.Controllers;
 [Route("api/users")]
 [ApiController]
 [EnableCors(PolicyNames.AllowSpecificOrigins)]
+[Authorize]
 public class UsersController : ControllerBase
 {
 
@@ -26,7 +28,7 @@ public class UsersController : ControllerBase
     }
 
 
-    [HttpGet]
+    [HttpGet]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetUsers()
     {
@@ -55,9 +57,11 @@ public class UsersController : ControllerBase
         return Ok(userDto);
     }
 
+
     [HttpPost("register", Name = "RegisterUser")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AllowAnonymous]
     public IActionResult RegisterUser([FromBody] CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
@@ -80,12 +84,13 @@ public class UsersController : ControllerBase
         }
         return CreatedAtRoute("GetUser", new { id = result.Id }, result);
     }
-    
 
 
-      [HttpPost("login",Name ="LoginUser") ]
+
+    [HttpPost("login", Name = "LoginUser")]      
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [AllowAnonymous]
     public IActionResult LoginUser([FromBody] UserLoginDto userLoginDto )
     {
         if (!ModelState.IsValid)
