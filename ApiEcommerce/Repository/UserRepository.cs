@@ -1,12 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.WebSockets;
+
 using System.Security.Claims;
 using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
-using Microsoft.Identity.Client;
+using ApiEcommerce.Utils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 
 namespace ApiEcommerce.Repository;
 
@@ -42,47 +41,26 @@ public class UserRepository : IUserRepository
             return new UserLoginResponseDto() { User = null, token = null, Message = "Username is required" };
         }
 
-        if (string.IsNullOrEmpty(userLoginDto.Password))
-        {
-            return new UserLoginResponseDto() { User = null, token = null, Message = "Password is required" };
-        }
+        
 
         var user = _db.Users.FirstOrDefault(u => u.Username == userLoginDto.Username.ToLower().Trim());
         if (user == null)
         {
-            return new UserLoginResponseDto() { User = null, token = null, Message = "User not found" };
+            return new UserLoginResponseDto() { User = null, token = null, Message = "Bad Credentials" };
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.Password))
+        if (!SecurityAdapter.isSamePassword(userLoginDto.Password!, user.Password!))
         {
-            return new UserLoginResponseDto() { User = null, token = null, Message = "Incorrect password" };
+            return new UserLoginResponseDto() { User = null, token = null, Message = "Bad Credentials" };
         }
 
         if (string.IsNullOrEmpty(secretKey))
         {
             throw new InvalidOperationException("La clave secreta no puede estar vacía.");
         }   
-          //TODO Generar el token fuera del repositorio
-
-          //entrada secretKey ,user, expiracion     
-        var key = System.Text.Encoding.UTF8.GetBytes(secretKey);
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim("id", user.Id.ToString()),
-                new Claim("username", user.Username),
-                new Claim(ClaimTypes.Role, user.Role??"")
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-
-        var handledToken = new JwtSecurityTokenHandler();
-        var token = handledToken.CreateToken(tokenDescriptor);        
           
-        //TODO Generar el token fuera del repositorio
-        //Regresa una cadena
+        var tokenString = SecurityAdapter.GenerateToken(user, secretKey);                  
+        
         return new UserLoginResponseDto()
         {
             User = new UserRegisterDto()
@@ -92,7 +70,7 @@ public class UserRepository : IUserRepository
                 Name = user.Name,
                 Role = user.Role
             },
-            token = handledToken.WriteToken(token),
+            token = tokenString,
             Message = "Login successful",
         };
 
@@ -100,7 +78,7 @@ public class UserRepository : IUserRepository
 
     public User Register(CreateUserDto createUserDto)
     {
-        var encryptedPassword = BCrypt.Net.BCrypt.HashPassword(createUserDto.Password);
+        string encryptedPassword = SecurityAdapter.generatePasswordHash(createUserDto.Password!);        
         var user = new User()
         {
             Username = createUserDto.Username,

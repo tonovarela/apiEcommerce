@@ -42,7 +42,30 @@ namespace ApiEcommerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Electronic devices and gadgets",
+                            Name = "Electronics"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Various kinds of books",
+                            Name = "Books"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Apparel and accessories",
+                            Name = "Clothing"
+                        });
                 });
 
             modelBuilder.Entity("ApiEcommerce.Models.Entities.Product", b =>
@@ -88,7 +111,7 @@ namespace ApiEcommerce.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("ApiEcommerce.Models.Entities.User", b =>
@@ -109,11 +132,12 @@ namespace ApiEcommerce.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("ApiEcommerce.Models.Entities.Product", b =>

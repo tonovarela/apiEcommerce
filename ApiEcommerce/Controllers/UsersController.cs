@@ -54,8 +54,8 @@ public class UsersController : ControllerBase
         var userDto = _mapper.Map<UserDto>(user);
         return Ok(userDto);
     }
-    
-    [HttpPost("register",Name ="RegisterUser") ]
+
+    [HttpPost("register", Name = "RegisterUser")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult RegisterUser([FromBody] CreateUserDto createUserDto)
@@ -80,6 +80,27 @@ public class UsersController : ControllerBase
         }
         return CreatedAtRoute("GetUser", new { id = result.Id }, result);
     }
+    
 
 
+      [HttpPost("login",Name ="LoginUser") ]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult LoginUser([FromBody] UserLoginDto userLoginDto )
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var user = _userRepository.Login(userLoginDto);        
+        if (user == null)
+        {
+            return Unauthorized("Credenciales inválidas.");
+        }
+        return Ok(user);
+    }
+
+
+    
 }
