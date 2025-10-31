@@ -27,9 +27,6 @@ public class ProductsController : ControllerBase
         _categoryRepository = categoryRepository;
     }
 
-
-
-
     [HttpGet("{productId:int}", Name = "GetProduct")]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -53,6 +50,7 @@ public class ProductsController : ControllerBase
         }
     }
 
+
     [HttpGet(Name = "GetProducts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [AllowAnonymous]
@@ -68,6 +66,7 @@ public class ProductsController : ControllerBase
 
         return Ok(productsDto);
     }
+
 
 
     [HttpPost(Name = "CreateProduct")]
