@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Asp.Versioning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,10 +91,62 @@ options =>
         new List<string>()
       }
     });
-  }
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+      Title = "API Ecommerce",
+      Version = "v1",
+      Description = "API Ecommerce para gestionar productos y categorias",
+      TermsOfService = new Uri("https://example.com/terms"),
+      Contact = new OpenApiContact
+      {
+        Name = "Soporte API Ecommerce",
+        Url = new Uri("https://example.com/contact")
+      },
+      License = new OpenApiLicense
+      {
+        Name = "Licencia API Ecommerce",
+        Url = new Uri("https://example.com/license"),
+      }
+    });
+    options.SwaggerDoc("v2", new OpenApiInfo
+    {
+      Title = "API Ecommerce",
+      Version = "v2",
+      Description = "API Ecommerce para gestionar productos y categorias",
+      TermsOfService = new Uri("https://example.com/terms"),
+      Contact = new OpenApiContact
+      {
+        Name = "Soporte API Ecommerce",
+        Url = new Uri("https://example.com/contact")
+      },
+      License = new OpenApiLicense
+      {
+        Name = "Licencia API Ecommerce",
+        Url = new Uri("https://example.com/license"),
+      }
+    });
+    
+
+
+   }
 );
 var policy = (CorsPolicyBuilder builder) => { builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();};
 
+var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
+{
+  options.AssumeDefaultVersionWhenUnspecified = true;
+  options.DefaultApiVersion = new ApiVersion(1, 0);
+  options.ReportApiVersions = true;
+  // options.ApiVersionReader = ApiVersionReader.Combine(
+  //   new QueryStringApiVersionReader("api-version")
+  // );
+});
+apiVersioningBuilder.AddApiExplorer(options =>
+{
+  options.GroupNameFormat = "'v'VVV";
+  options.SubstituteApiVersionInUrl = true;
+  
+});
 builder.Services.AddCors(op =>
 {
     op.AddPolicy(PolicyNames.AllowSpecificOrigins, policy);
@@ -106,7 +159,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+      options.SwaggerEndpoint("/swagger/v1/swagger.json", "API Ecommerce v1");        
+      options.SwaggerEndpoint("/swagger/v2/swagger.json", "API Ecommerce v2");        
+    });
 }
 
 app.UseHttpsRedirection();

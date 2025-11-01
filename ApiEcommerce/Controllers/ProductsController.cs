@@ -3,13 +3,18 @@ using ApiEcommerce.Constants;
 using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
+using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 namespace ApiEcommerce.Controllers;
-[Route("api/[controller]")]
+
+[Route("api/v{version:apiVersion}/[controller]")]
+
 [ApiController]
+[ApiVersionNeutral]   
+
 [EnableCors(PolicyNames.AllowSpecificOrigins)]
 [Authorize(Roles = "Admin")]    
 public class ProductsController : ControllerBase

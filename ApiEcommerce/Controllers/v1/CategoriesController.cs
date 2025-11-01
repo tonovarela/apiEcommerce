@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using ApiEcommerce.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using ApiEcommerce.Constants;
+using Asp.Versioning;
 
-namespace ApiEcommerce.Controllers
+namespace ApiEcommerce.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]    
     [Authorize(Roles = "Admin")]    
     public class CategoriesController : ControllerBase
     {
@@ -22,16 +24,18 @@ namespace ApiEcommerce.Controllers
         }
 
         [HttpGet(Name = "GetCategories")]
-        //[ResponseCache(Duration = 10)]
-        [ResponseCache(CacheProfileName = CacheProfiles.Default10)]
+
+        //[ResponseCache(CacheProfileName = CacheProfiles.Default10)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [AllowAnonymous]        
+        [Obsolete("Use GetCategoriesOrderById in v2")]
+        
+        [AllowAnonymous]
         public IActionResult GetCategories()
         {
 
-            Console.WriteLine($"GetCategories called  at{ DateTime.Now}");
-            var categories = _categoryRepository.GetCategories();            
+            Console.WriteLine($"Version 1.0");
+            var categories = _categoryRepository.GetCategories();
             var categoriesDto = new List<CategoryDto>();
             foreach (var category in categories)
             {
@@ -40,11 +44,17 @@ namespace ApiEcommerce.Controllers
             Console.WriteLine("Retrieved categories: " + categoriesDto.Count);
             return Ok(categoriesDto);
         }
+        
+
+
+       
+
 
 
         [HttpGet("{categoryId:int}", Name = "GetCategory")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        
         [AllowAnonymous]
         public IActionResult GetCategory(int categoryId)
         {
@@ -65,6 +75,10 @@ namespace ApiEcommerce.Controllers
             }
         }
 
+       
+       
+       
+       
         [HttpPost(Name = "CreateCategory")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status201Created)]
