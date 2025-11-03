@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Identity;
+using ApiEcommerce.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,12 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
+
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

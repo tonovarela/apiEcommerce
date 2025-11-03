@@ -1,7 +1,6 @@
-using System;
+
 using ApiEcommerce.Constants;
 using ApiEcommerce.Models.Dtos;
-using ApiEcommerce.Models.Entities;
 using ApiEcommerce.Repository.IRepository;
 using Asp.Versioning;
 using AutoMapper;
@@ -38,33 +37,33 @@ public class UsersController : ControllerBase
         List<UserDto> usersDto = new List<UserDto>();
         foreach (var user in users)
         {
-            user.Password = null; // Omitir la contraseña en la respuesta
+            //user.Password = null; // Omitir la contraseña en la respuesta
             usersDto.Add(_mapper.Map<UserDto>(user));
         }
         return Ok(usersDto);
     }
 
-    [HttpGet("{id:int}", Name = "GetUser")]
+    [HttpGet("{id}", Name = "GetUser")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetUser(int id)
+    public IActionResult GetUser(string id)
     {
-        var user = _userRepository.GetUser(id);
+        var user =  _userRepository.GetUser(id);
         if (user == null)
         {
             return NotFound();
         }
-        user.Password = null; // Omitir la contraseña en la respuesta
+        //user.Password = null; // Omitir la contraseña en la respuesta
         var userDto = _mapper.Map<UserDto>(user);
         return Ok(userDto);
     }
 
 
     [HttpPost("register", Name = "RegisterUser")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    //[ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
-    public IActionResult RegisterUser([FromBody] CreateUserDto createUserDto)
+    public async Task<IActionResult> RegisterUser([FromBody] CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
         {
@@ -78,13 +77,14 @@ public class UsersController : ControllerBase
         {
             return BadRequest("El nombre de usuario ya existe.");
         }
-        var result = _userRepository.Register(createUserDto);
-        result.Password = null; // Omitir la contraseña en la respuesta
+        var result =await  _userRepository.Register(createUserDto);
+        //result.Password = null; // Omitir la contraseña en la respuesta
         if (result == null)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Error al registrar el usuario.");
         }
-        return CreatedAtRoute("GetUser", new { id = result.Id }, result);
+                
+        return CreatedAtRoute("GetUser", new { id = result.Id! }, result);
     }
 
 
@@ -93,14 +93,14 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [AllowAnonymous]
-    public IActionResult LoginUser([FromBody] UserLoginDto userLoginDto )
+    public async Task<IActionResult> LoginUser([FromBody] UserLoginDto userLoginDto )
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var user = _userRepository.Login(userLoginDto);        
+        var user = await _userRepository.Login(userLoginDto);        
         if (user == null)
         {
             return Unauthorized("Credenciales inválidas.");

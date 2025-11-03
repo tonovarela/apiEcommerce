@@ -1,5 +1,7 @@
 using System;
+using ApiEcommerce.Models;
 using ApiEcommerce.Models.Dtos;
+using ApiEcommerce.Models.Dtos.User;
 using ApiEcommerce.Models.Entities;
 
 namespace ApiEcommerce.Repository.IRepository;
@@ -7,15 +9,15 @@ namespace ApiEcommerce.Repository.IRepository;
 public interface IUserRepository
 {
 
-    ICollection<User> GetUsers();
+    ICollection<ApplicationUser> GetUsers();
 
-    User? GetUser(int id);
+    ApplicationUser? GetUser(string id);
 
     bool isUniqueUser(string username);
 
-    UserLoginResponseDto Login(UserLoginDto userLoginDto);
+    Task<UserLoginResponseDto> Login(UserLoginDto userLoginDto);
 
-    User Register(CreateUserDto userRegisterDto); 
+    Task<UserDataDto> Register(CreateUserDto userRegisterDto); 
 
 
 }

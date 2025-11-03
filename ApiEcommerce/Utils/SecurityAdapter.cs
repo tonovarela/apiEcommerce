@@ -1,6 +1,7 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ApiEcommerce.Models;
 using ApiEcommerce.Models.Entities;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,6 +9,28 @@ namespace ApiEcommerce.Utils;
 
 public static  class SecurityAdapter
 {
+
+
+ public static string GenerateToken(ApplicationUser user, string secretKey,string[] roles)
+    {
+
+        var key = System.Text.Encoding.UTF8.GetBytes(secretKey);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim("id", user.Id.ToString()),
+                new Claim("username", user.UserName!),
+                new Claim(ClaimTypes.Role, String.Join(",", roles))
+            }),
+            Expires = DateTime.UtcNow.AddHours(1),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var handledToken = new JwtSecurityTokenHandler();
+        var token = handledToken.CreateToken(tokenDescriptor);
+        return handledToken.WriteToken(token);
+    }
 
     public static string GenerateToken(User user, string secretKey)
     {

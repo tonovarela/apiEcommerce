@@ -28,8 +28,7 @@ namespace ApiEcommerce.Controllers.v1
         //[ResponseCache(CacheProfileName = CacheProfiles.Default10)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Obsolete("Use GetCategoriesOrderById in v2")]
-        
+        [Obsolete("Use GetCategoriesOrderById in v2")]        
         [AllowAnonymous]
         public IActionResult GetCategories()
         {

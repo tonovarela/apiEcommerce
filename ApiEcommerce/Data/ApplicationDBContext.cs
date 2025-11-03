@@ -1,18 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 
 using ApiEcommerce.Models.Entities;
-public class ApplicationDbContext : DbContext
+using ApiEcommerce.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
 
-        
+
     }
+    
+    
 
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<User> Users { get; set; }
+
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,16 +33,6 @@ public class ApplicationDbContext : DbContext
             new Category { Id = 3, Name = "Clothing", Description = "Apparel and accessories" }
         );
 
-
-
         
-
-        
-
-
-
-
-
-
     }
 }
