@@ -16,7 +16,7 @@ namespace ApiEcommerce.Controllers;
 [ApiVersionNeutral]   
 
 [EnableCors(PolicyNames.AllowSpecificOrigins)]
-[Authorize(Roles = "Admin")]    
+[Authorize(Roles = "User")]    
 public class ProductsController : ControllerBase
 {
 
@@ -76,13 +76,47 @@ public class ProductsController : ControllerBase
 
     [HttpPost(Name = "CreateProduct")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public IActionResult CreateProduct([FromBody] CreateProductDto createProductDto)
+    public IActionResult CreateProduct([FromForm] CreateProductDto createProductDto)
     {
         if (!_categoryRepository.CategoryExists(createProductDto.CategoryId))
         {
             return NotFound(new { Message = "Category not found." });
         }
+
+        if (_productRepository.ProductExist(createProductDto.Name))
+        {
+            ModelState.AddModelError("CustomError", "The product already exists.");
+            return BadRequest(ModelState);
+        }
+
         var product = _mapper.Map<Product>(createProductDto);
+
+        UploadProductImage(createProductDto, product);
+
+        // product.ImgUrl = createProductDto.Image != null
+        //                                         ? $"{product.ProductId}-{Guid.NewGuid()}{Path.GetExtension(createProductDto.Image.FileName)}"
+        //                                         : "https://placehold.co/300x300";        
+        //                                         Console.WriteLine("Imagen URL: " + product.ImgUrl);
+
+        //     if (createProductDto.Image != null)
+        //     {
+        //     var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages", product.ImgUrl);
+        //     var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
+        //     if (!Directory.Exists(imageDirectory))
+        //     {
+        //         Directory.CreateDirectory(imageDirectory);
+        //     }                
+        //     Console.WriteLine("Ruta de la imagen: " + imagePath);
+
+        //     using (var stream = new FileStream(imagePath, FileMode.Create))
+        //     {
+        //         createProductDto.Image.CopyTo(stream);
+        //         var baseUrl = $"{Request.Scheme}://{Request.Host.Value}//{Request.PathBase.Value}";
+        //         product.ImgUrl = $"{baseUrl}/ProductImages/{product.ImgUrl}";
+        //         product.ImgUrlLocal = imagePath;
+        //     }
+        //     }
+
         bool registro = _productRepository.CreateProduct(product);
         if (!registro)
         {
@@ -161,7 +195,7 @@ public class ProductsController : ControllerBase
     [HttpPut("{productId:int}", Name = "UpdateProduct")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult UpdateProduct(int productId, [FromBody] UpdateProductDto productDto)
+    public IActionResult UpdateProduct(int productId, [FromForm] UpdateProductDto updateProductDto)
     {
         var product = _productRepository.GetProduct(productId);
 
@@ -169,12 +203,15 @@ public class ProductsController : ControllerBase
         {
             return NotFound();
         }
-        if (!_categoryRepository.CategoryExists(productDto.CategoryId))
+        if (!_categoryRepository.CategoryExists(updateProductDto.CategoryId))
         {
             return NotFound(new { Message = "Category not found." });
         }
+
+        UploadProductImage(updateProductDto, product);
+
         product.UpdateDate = DateTime.Now;
-        _mapper.Map(productDto, product);
+        _mapper.Map(updateProductDto, product);
         bool actualizo = _productRepository.UpdateProduct(product);
         if (!actualizo)
         {
@@ -183,9 +220,33 @@ public class ProductsController : ControllerBase
         return Ok(_mapper.Map<ProductDto>(product));
     }
 
+    private void UploadProductImage(dynamic productDto, Product product)
+    {
+        product.ImgUrl = productDto.Image != null
+                                                ? $"{product.ProductId}-{Guid.NewGuid()}{Path.GetExtension(productDto.Image.FileName)}"
+                                                : "https://placehold.co/300x300";
+
+        if (productDto.Image != null)
+        {
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages", product.ImgUrl);
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
+
+            using (var stream = new FileStream(imagePath, FileMode.Create))
+            {
+                productDto.Image.CopyTo(stream);
+                var baseUrl = $"{Request.Scheme}://{Request.Host.Value}//{Request.PathBase.Value}";
+                product.ImgUrl = $"{baseUrl}/ProductImages/{product.ImgUrl}";
+                product.ImgUrlLocal = imagePath;
+            }
+        }
+    }
 
 
-     [HttpGet("buyProduct/{name}/quantity/{quantity:int}", Name = "BuyProduct")]
+    [HttpGet("buyProduct/{name}/quantity/{quantity:int}", Name = "BuyProduct")]
      [ProducesResponseType(StatusCodes.Status200OK)]
      [ProducesResponseType(StatusCodes.Status404NotFound)]
      [ProducesResponseType(StatusCodes.Status400BadRequest)]

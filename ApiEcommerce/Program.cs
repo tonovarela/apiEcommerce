@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using ApiEcommerce.Models;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -144,11 +145,9 @@ var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
 {
   options.AssumeDefaultVersionWhenUnspecified = true;
   options.DefaultApiVersion = new ApiVersion(1, 0);
-  options.ReportApiVersions = true;
-  // options.ApiVersionReader = ApiVersionReader.Combine(
-  //   new QueryStringApiVersionReader("api-version")
-  // );
+  options.ReportApiVersions = true;  
 });
+
 apiVersioningBuilder.AddApiExplorer(options =>
 {
   options.GroupNameFormat = "'v'VVV";
@@ -174,6 +173,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseCors(PolicyNames.AllowSpecificOrigins);
