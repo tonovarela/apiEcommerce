@@ -1,5 +1,3 @@
-
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -37,6 +35,7 @@ public class Product
     // Foreign Key
     public int CategoryId { get; set; }
     [ForeignKey("CategoryId")]
-    public required Category Category { get; set; } = null!;
+    
+    public  Category? Category { get; set; }
 
 }
