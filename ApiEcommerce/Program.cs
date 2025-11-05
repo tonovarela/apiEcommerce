@@ -50,7 +50,10 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddSingleton<IMapper, ServiceMapper>();
+// Registrar Mapster correctamente
+var typeAdapterConfig = TypeAdapterConfig.GlobalSettings;
+builder.Services.AddSingleton(typeAdapterConfig);
+builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
