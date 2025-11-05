@@ -1,5 +1,5 @@
 using ApiEcommerce.Repository.IRepository;
-using AutoMapper;
+using MapsterMapper;
 using ApiEcommerce.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using ApiEcommerce.Models.Entities;
@@ -16,8 +16,8 @@ namespace ApiEcommerce.Controllers.v1
     public class CategoriesController : ControllerBase
     {
          private readonly ICategoryRepository _categoryRepository;
-         private readonly  IMapper _mapper;
-        public CategoriesController(ICategoryRepository categoryRepository,IMapper mapper)
+         private readonly IMapper _mapper;
+        public CategoriesController(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;

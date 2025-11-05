@@ -62,6 +62,18 @@ public class ProductRepository : IProductRepository
         .ToList();
     }
 
+    public ICollection<Product> GetProductsInPages(int pageNumber, int pageSize)
+    {
+        return _db.Products
+                  .Skip((pageNumber - 1) * pageSize)
+                  .Take(pageSize)
+                  .OrderBy(p => p.ProductId)
+                  .ToList();
+    }
+
+    public int GetTotalProducts() =>_db.Products.Count();
+    
+
     public bool ProductExist(int productId)
     {
         return _db.Products.Any(p => p.ProductId == productId);

@@ -1,10 +1,10 @@
-
 using ApiEcommerce.Constants;
 using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Models.Entities;
+using ApiEcommerce.Models.Responses;
 using ApiEcommerce.Repository.IRepository;
 using Asp.Versioning;
-using AutoMapper;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +19,8 @@ namespace ApiEcommerce.Controllers;
 [Authorize(Roles = "User")]    
 public class ProductsController : ControllerBase
 {
-
     private readonly IMapper _mapper;
     private readonly IProductRepository _productRepository;
-
     private readonly ICategoryRepository _categoryRepository;
 
     public ProductsController(IMapper mapper, IProductRepository productRepository, ICategoryRepository categoryRepository)
@@ -47,7 +45,46 @@ public class ProductsController : ControllerBase
             }
             var productDto = _mapper.Map<ProductDto>(product);
             return Ok(productDto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+    }
 
+
+
+    [HttpGet("Paged", Name = "GetProductInPage")]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public IActionResult GetProductInPage([FromQuery] int pageNumber = 1,
+                                          [FromQuery] int pageSize = 10)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Max(1, pageSize);
+        try
+        {
+            var totalProducts = _productRepository.GetTotalProducts();
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+            if (pageNumber > totalPages && totalPages != 0)
+            {
+                return BadRequest(new { Message = "Page number exceeds total pages available." });
+            }
+            var products = _productRepository.GetProductsInPages(pageNumber, pageSize);
+            var productsDto = new List<ProductDto>();
+            foreach (var product in products)
+            {
+                productsDto.Add(_mapper.Map<ProductDto>(product));
+            }
+            return Ok(new PaginationResponse<ProductDto>
+            {                
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                Items = productsDto
+            });
         }
         catch (InvalidOperationException ex)
         {
@@ -65,12 +102,16 @@ public class ProductsController : ControllerBase
         var productsDto = new List<ProductDto>();
         foreach (Product product in products)
         {
-            var ProductDto = _mapper.Map<ProductDto>(product);            
+            var ProductDto = _mapper.Map<ProductDto>(product);
             productsDto.Add(ProductDto);
         }
-
         return Ok(productsDto);
     }
+    
+
+  
+
+    
 
 
 
@@ -82,48 +123,23 @@ public class ProductsController : ControllerBase
         {
             return NotFound(new { Message = "Category not found." });
         }
-
         if (_productRepository.ProductExist(createProductDto.Name))
         {
             ModelState.AddModelError("CustomError", "The product already exists.");
             return BadRequest(ModelState);
         }
-
         var product = _mapper.Map<Product>(createProductDto);
-
-        UploadProductImage(createProductDto, product);
-
-        // product.ImgUrl = createProductDto.Image != null
-        //                                         ? $"{product.ProductId}-{Guid.NewGuid()}{Path.GetExtension(createProductDto.Image.FileName)}"
-        //                                         : "https://placehold.co/300x300";        
-        //                                         Console.WriteLine("Imagen URL: " + product.ImgUrl);
-
-        //     if (createProductDto.Image != null)
-        //     {
-        //     var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages", product.ImgUrl);
-        //     var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProductImages");
-        //     if (!Directory.Exists(imageDirectory))
-        //     {
-        //         Directory.CreateDirectory(imageDirectory);
-        //     }                
-        //     Console.WriteLine("Ruta de la imagen: " + imagePath);
-
-        //     using (var stream = new FileStream(imagePath, FileMode.Create))
-        //     {
-        //         createProductDto.Image.CopyTo(stream);
-        //         var baseUrl = $"{Request.Scheme}://{Request.Host.Value}//{Request.PathBase.Value}";
-        //         product.ImgUrl = $"{baseUrl}/ProductImages/{product.ImgUrl}";
-        //         product.ImgUrlLocal = imagePath;
-        //     }
-        //     }
-
+        UploadProductImage(createProductDto, product);    
         bool registro = _productRepository.CreateProduct(product);
         if (!registro)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the product.");
         }
-
         var createdProduct  =_productRepository.GetProduct(product.ProductId);
+        if (createdProduct == null)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving created product.");
+        }
         var createdProductDto = _mapper.Map<ProductDto>(createdProduct);        
         return CreatedAtRoute("GetProduct", new { productId = createdProductDto.ProductId }, createdProductDto);
     }
@@ -198,7 +214,6 @@ public class ProductsController : ControllerBase
     public IActionResult UpdateProduct(int productId, [FromForm] UpdateProductDto updateProductDto)
     {
         var product = _productRepository.GetProduct(productId);
-
         if (product == null)
         {
             return NotFound();
@@ -207,9 +222,7 @@ public class ProductsController : ControllerBase
         {
             return NotFound(new { Message = "Category not found." });
         }
-
         UploadProductImage(updateProductDto, product);
-
         product.UpdateDate = DateTime.Now;
         _mapper.Map(updateProductDto, product);
         bool actualizo = _productRepository.UpdateProduct(product);

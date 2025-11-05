@@ -1,9 +1,8 @@
-
 using ApiEcommerce.Constants;
 using ApiEcommerce.Models.Dtos;
 using ApiEcommerce.Repository.IRepository;
 using Asp.Versioning;
-using AutoMapper;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +36,6 @@ public class UsersController : ControllerBase
         List<UserDto> usersDto = new List<UserDto>();
         foreach (var user in users)
         {
-            //user.Password = null; // Omitir la contraseña en la respuesta
             usersDto.Add(_mapper.Map<UserDto>(user));
         }
         return Ok(usersDto);
@@ -53,7 +51,6 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        //user.Password = null; // Omitir la contraseña en la respuesta
         var userDto = _mapper.Map<UserDto>(user);
         return Ok(userDto);
     }
